@@ -1,6 +1,8 @@
-Chrome extension for adding IMDb and Rotten Tomatoes ratings to watchever
+Firefox extension (should work for chrome as well) for adding Rotten Tomatoes ratings to Netflix. It is based on Prime Ratings and was only adopted to work with Netflix and fit my needs better.
 
 * * * Neither this extension, nor its author is in any way affiliated with Netflix company. * * *
+
+
 Description
 
 This extension seamlessly adds the ratings from Rotten Tomatoes into the Netflix web interface. Each movie and series detail page gets two more rating rows (if the movie/series can be found in IMDb).
