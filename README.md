@@ -1,6 +1,12 @@
-Firefox extension (should work for chrome as well) for adding Rotten Tomatoes ratings to Netflix. It is based on Prime Ratings and was only adopted to work with Netflix and fit my needs better. (https://github.com/joscha/prime-ratings)
+Firefox and Chrome extension for adding Rotten Tomatoes ratings to Netflix. It is based on Prime Ratings by Josha Feth (thanks!) and was only adopted to work with Netflix and fit my needs better. (https://github.com/joscha/prime-ratings)
 
 * * * Neither this extension, nor its author is in any way affiliated with Netflix company. * * *
+
+Installation
+
+Firefox: to come.
+Chrome: https://chrome.google.com/webstore/detail/netflix-ratings/fphndbhmiihdlggidjkajlifmkilgppp
+
 
 
 Description
@@ -10,11 +16,12 @@ Install
 
 History
 
-    0.3 (2016-08-28): initial public version
+    0.2 (2016-08-28): initial public version
 
 Acknowledgements
 
 The ratings for Netflix extension uses the Open Movie Database API by Brian Fritz (http://www.omdbapi.com/) for querying IMDb and Rotten Tomatoes. Thanks Brian!
+
 License
 
 MIT
