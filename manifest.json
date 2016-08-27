@@ -1,0 +1,37 @@
+{
+
+  "manifest_version": 2,
+  "name": "netflix-ratings",
+  "version": "0.2",
+
+  "description": "This Extension adds Rotten Tomatoes Critics and User Critics to movies whenever they can be matched.",
+
+  "icons": {
+    "48": "icons/logo48.png",
+	"96": "icons/logo96.png"
+  },
+  
+  "permissions": [
+    "*://www.netflix.com/*",
+    "*://www.netflix.de/*",
+    "*://www.netflix.co.uk/*"
+  ],
+  
+  "content_scripts": [
+    {
+	  "run_at": "document_end",
+      "matches": [
+        "*://www.netflix.com/*",
+        "*://www.netflix.de/*",
+        "*://www.netflix.co.uk/*"
+      ],
+      "js": ["jquery-3.1.0.min.js", "flixrate.js"],
+	  "css": ["flixrate.css"]
+    }
+  ],
+  
+  "web_accessible_resources": [
+    "flixrate.css"
+  ]
+
+}
