@@ -61,7 +61,7 @@
 			var myClass = $box.find('.imdb-rating').get(0).parent().attr("class");
 			
 		}
-
+		
 		$.each(results, function(index, result) {
 			if (hasRating) {
 				window.console.debug("Rating was already detected: " + myClass);
@@ -87,17 +87,9 @@
 	//extract useful data from response from omdb
 	var annotate = function(data) {
 		var result = [];
-		//I don't care for IMDb Ratings :)
-		// if (data.imdbID && data.imdbRating !== 'N/A') {
-			// result.push({
-				// type: 'imdb',
-				// label: 'IMDb',
-				// rating: +data.imdbRating,
-				// maxRating: 10,
-				// details: null
-			// });
-		// }
+		var hasTomatoeResult = false;
 		if (data.tomatoMeter !== 'N/A') {
+			hasTomatoeResult = true;
 			result.push({
 				type: 'rottenCritic',
 				label: 'Rotten Tomatoes Critic',
@@ -106,13 +98,24 @@
 				details: data.tomatoConsensus !== 'N/A' ? htmlNumericEntityUnescape(data.tomatoConsensus) : null
 			});
 		}
-		if (data.rottenUser !== 'N/A') {
+		if (data.tomatoUserMeter !== 'N/A') {
+			hasTomatoeResult = true;
 			result.push({
 				type: 'rottenUser',
 				label: 'Rotten Tomatoes User',
 				rating: +data.tomatoUserMeter,
 				//maxRating: 100,
 				details: data.tomatoConsensus !== 'N/A' ? htmlNumericEntityUnescape(data.tomatoConsensus) : null
+			});
+		}
+		//I don't too much care for IMDb Ratings :)
+		if (data.imdbID && data.imdbRating !== 'N/A' && hasTomatoeResult == false) {
+			result.push({
+				type: 'imdb',
+				label: 'IMDb',
+				rating: +data.imdbRating,
+				maxRating: 10,
+				details: null
 			});
 		}
 		addRating(result);
