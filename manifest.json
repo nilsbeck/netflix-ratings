@@ -2,7 +2,7 @@
 
   "manifest_version": 2,
   "name": "netflix-ratings",
-  "version": "0.2",
+  "version": "0.3.4",
 
   "description": "This Extension adds Rotten Tomatoes Critics and User Critics to movies whenever they can be matched.",
 
