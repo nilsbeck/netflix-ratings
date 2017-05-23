@@ -2,21 +2,21 @@
   "author": "Nils Beckmann",
   "manifest_version": 2,
   "name": "netflix-ratings",
-  "version": "0.3.6",
+  "version": "0.7.0",
 
-  "description": "This Extension adds Rotten Tomatoes Critics and User Critics to movies whenever they can be matched.",
+  "description": "This Extension adds themoviedb.org ratings to movies whenever they can be matched.",
 
   "icons": {
     "48": "icons/logo48.png",
 	"96": "icons/logo96.png"
   },
-  
+
   "permissions": [
     "*://www.netflix.com/*",
     "*://www.netflix.de/*",
     "*://www.netflix.co.uk/*"
   ],
-  
+
   "content_scripts": [
     {
 	  "run_at": "document_end",
@@ -29,9 +29,10 @@
 	  "css": ["flixrate.css"]
     }
   ],
-  
+
   "web_accessible_resources": [
     "flixrate.css"
-  ]
+    ],
+    "homepage_url": "https://github.com/nilsbeck/netflix-ratings"
 
 }

@@ -1,20 +1,17 @@
 (function($) {
 	'use strict';
-	
+
 	var $body = $('body');
 	$body.on('ratings.load',function(e, query) {
-		//originally needed for german amazon prime in prime-ratings
-		//query.t = query.t
-			// .replace('[dt./OV]', '')
-			// .replace('[OV]', '')
-			// .replace('[OV/OmU]', '');
-
-		$.getJSON('https://www.omdbapi.com/', query, function(data) {
+		var isTV = query['isTV']
+		delete query['isTV']
+		query['api_key']=localStorage['netflix-ratings-apikey']||'94351e0efb7713d0ad0f46078bff2b14'
+		$.getJSON('https://api.themoviedb.org/3/search/'+(isTV?'tv':'movie'), query, function(data) {
 			$body.trigger('ratings.return', [data]);
 		});
 	});
 
-	var isDebug = false;
+	var isDebug = localStorage['netflix-ratings-isDebug']||false;
 	var $body = $('body');
 	var lastTitle = "";
 
@@ -47,21 +44,22 @@
 			if (isDebug) {
 				window.console.debug("Hover div detected");
 			}
-			$box = $('.meta');
+			$box = $hoverbox.find('.meta');
 		} else {
 			if (isDebug) {
 				window.console.debug("No hover div detected");
 			}
-			
-			$box = $('.jawBonePanes').find('.meta');
+
+			$box = $('.jawBoneOpenContainer').length?$('.jawBoneOpenContainer').find('.meta'):$('.jawBone').find('.meta');
 		}
 
 		if($box.find('.imdb-rating').length > 0){
 			var hasRating = true;
-			var myClass = $box.find('.imdb-rating').get(0).parent().attr("class");
-			
+			// var myClass = $box.find('.imdb-rating').get(0).parent().attr("class");
+			var myClass = $box.find('.imdb-rating').find('i').attr('class').split('-')[0]
+
 		}
-		
+
 		$.each(results, function(index, result) {
 			if (hasRating) {
 				window.console.debug("Rating was already detected: " + myClass);
@@ -73,7 +71,7 @@
 					'title': result.details || ''
 			});
 			$list.append('<i class="'+result.type+'-logo-medium">'+result.label+'</i>');
-			$list.append('<strong>'+result.rating+'%</strong>');
+			$list.append('<strong>'+result.rating+'/10 ('+result.count+')</strong>');
 
 			$list.appendTo($box);
 		});
@@ -91,44 +89,26 @@
 		if (data.tomatoMeter !== 'N/A') {
 			hasTomatoeResult = true;
 			result.push({
-				type: 'rottenCritic',
-				label: 'Rotten Tomatoes Critic',
-				rating: +data.tomatoMeter,
+				type: 'themoviedb',
+				label: 'The Movie DB',
+				rating: +data.results[0].vote_average,
 				//maxRating: 100,
-				details: data.tomatoConsensus !== 'N/A' ? htmlNumericEntityUnescape(data.tomatoConsensus) : null
-			});
-		}
-		if (data.tomatoUserMeter !== 'N/A') {
-			hasTomatoeResult = true;
-			result.push({
-				type: 'rottenUser',
-				label: 'Rotten Tomatoes User',
-				rating: +data.tomatoUserMeter,
-				//maxRating: 100,
-				details: data.tomatoConsensus !== 'N/A' ? htmlNumericEntityUnescape(data.tomatoConsensus) : null
-			});
-		}
-		//I don't too much care for IMDb Ratings :)
-		if (data.imdbID && data.imdbRating !== 'N/A' && hasTomatoeResult == false) {
-			result.push({
-				type: 'imdb',
-				label: 'IMDb',
-				rating: +data.imdbRating,
-				maxRating: 10,
-				details: null
+				count: data.results[0].vote_count,
+				details: (data.results[0].original_name||data.results[0].title)+' ( '+(data.results[0].release_date||data.results[0].first_air_date)+') - '+data.results[0].overview
 			});
 		}
 		addRating(result);
 	};
 
 	var queries = [];
-	function addQueries(description, year) {
+	function addQueries(description, year, isTV) {
+		// TODO TV or MOVIE
 		if (description && year) {
 			queries.push(function() {
 				return {
-					t:			description,
-					y:			year,
-					tomatoes:	true
+					query:			description,
+					year:			year,
+					isTV: isTV
 				};
 			});
 		}
@@ -136,11 +116,12 @@
 		if (description) {
 			queries.push(function() {
 				return {
-					t:			description,
-					tomatoes:	true
+					query:			description,
+					isTV: isTV
 				};
 			});
 		}
+
 		if (isDebug) {
 			window.console.log('queries:', queries.length);
 		}
@@ -161,6 +142,14 @@
 		return $.trim(title.text());
 	}
 
+	function getIsTV(){
+		return $('div.jawbone-overview-info.has-jawbone-nav-transition').find('.duration').text().includes('Season')
+	}
+
+	function getHasRating(){
+		return $('.jawBoneOpenContainer').find('.meta').find('.imdb-rating').length>0
+	}
+
 	function fallbackQuery() {
 		var curFn = queries.shift();
 		if (typeof curFn === 'function') {
@@ -171,11 +160,18 @@
 			$body.trigger('ratings.load', [query]);
 		} else {
 			window.console.error('Could not find any data');
+			addRating([{
+				type: 'themoviedb',
+				label: 'The Movie DB',
+				rating: '?',
+				details: '?'
+			}])
 		}
 	}
 
 	$body.on('ratings.return', function(e, data) {
-		if (data.Response === 'True') {
+		data.results=data.results.filter(r=>r.vote_count>0)
+		if (data.results.length>0) {
 			queries = []; // we got a hit, so reset queries
 			if (isDebug) {
 				window.console.debug('success', data);
@@ -191,7 +187,11 @@
 
 	var description = getMovieDescription();
 	var year = getReleaseInfo().year;
-	addQueries(description, year);
+	var isTV = getIsTV();
+	var hasRating = getHasRating();
+	if (!hasRating){
+		addQueries(description, year, isTV);
+	}
 
 	// Observe a specific DOM element if it exists:
 	var $content = $('#appMountPoint');
@@ -204,21 +204,26 @@
 				window.console.log('Content changed');
 			}
 			//netflix dom allows diffrent dynamic element trees. check if hover div exists, or splitview (jawbone view)
-			var $jawBoneDescription = ($('.jawBone').find("div.title").text() != "") ? $('.jawBone').find("div.title").text() : $('div.smallTitleCard.highlighted').attr("aria-label");
-			var $jawBoneYear = $('.jawBone').find("span.year").text();
+			var $jawBoneDescription = ($('.jawBoneOpenContainer .jawBone').find("div.title").text() != "") ? $('.jawBoneOpenContainer .jawBone').find("div.title").text() : $('div.smallTitleCard.highlighted').attr("aria-label");
+			var $jawBoneYear = $('.jawBoneOpenContainer .jawBone').find("span.year").text();
+			var $isTV = $('.jawBoneOpenContainer .jawBone').find('.duration').text().includes('Season');
+			var $hasRating = $('.jawBoneOpenContainer').find('.meta').find('.imdb-rating').length
+
 			var $hoverBoxDescription = $('div.hasBob.smallTitleCard').find("div.bob-title").text();
 			var $hoverBoxYear = $('div.hasBob.smallTitleCard').find("span.year").text();
-			
+			var $hoverIsTv = $('div.hasBob.smallTitleCard').find('.duration').text().includes('Season');
+			var $hoverHasRating = $('div.hasBob.smallTitleCard').find('.meta').find('.imdb-rating').length
+
 			//addqueries depending on dom-tree state
-			if($jawBoneDescription != "" && $jawBoneDescription != null)
+			if($jawBoneDescription != "" && $jawBoneDescription != null && !$hasRating)
 			{
-				addQueries($jawBoneDescription, $jawBoneYear);
+				addQueries($jawBoneDescription, $jawBoneYear, $isTV);
 			}
-			else if($hoverBoxDescription != "")
+			else if($hoverBoxDescription != "" && !$hoverHasRating)
 			{
-				addQueries($hoverBoxDescription, $hoverBoxYear);
+				addQueries($hoverBoxDescription, $hoverBoxYear, $hoverIsTv);
 			}
-			
+
 		});
 	}
 
