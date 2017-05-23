@@ -71,7 +71,7 @@
 					'title': result.details || ''
 			});
 			$list.append('<i class="'+result.type+'-logo-medium">'+result.label+'</i>');
-			$list.append('<strong>'+result.rating+'/10 ('+result.details+')</strong>');
+			$list.append('<strong>'+result.rating+'/10 ('+result.count+')</strong>');
 
 			$list.appendTo($box);
 		});
@@ -93,7 +93,8 @@
 				label: 'The Movie DB',
 				rating: +data.results[0].vote_average,
 				//maxRating: 100,
-				details: data.results[0].vote_count
+				count: data.results[0].vote_count,
+				details: (data.results[0].original_name||data.results[0].title)+' ( '+(data.results[0].release_date||data.results[0].first_air_date)+') - '+data.results[0].overview
 			});
 		}
 		addRating(result);
