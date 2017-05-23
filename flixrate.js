@@ -50,7 +50,7 @@
 				window.console.debug("No hover div detected");
 			}
 
-			$box = $('.jawBoneOpenContainer').find('.meta');
+			$box = $('.jawBoneOpenContainer').length?$('.jawBoneOpenContainer').find('.meta'):$('.jawBone').find('.meta');
 		}
 
 		if($box.find('.imdb-rating').length > 0){
@@ -71,7 +71,7 @@
 					'title': result.details || ''
 			});
 			$list.append('<i class="'+result.type+'-logo-medium">'+result.label+'</i>');
-			$list.append('<strong>'+result.rating+'/10</strong>');
+			$list.append('<strong>'+result.rating+'/10 ('+result.details+')</strong>');
 
 			$list.appendTo($box);
 		});
@@ -120,6 +120,7 @@
 				};
 			});
 		}
+
 		if (isDebug) {
 			window.console.log('queries:', queries.length);
 		}
@@ -158,10 +159,17 @@
 			$body.trigger('ratings.load', [query]);
 		} else {
 			window.console.error('Could not find any data');
+			addRating([{
+				type: 'themoviedb',
+				label: 'The Movie DB',
+				rating: '?',
+				details: '?'
+			}])
 		}
 	}
 
 	$body.on('ratings.return', function(e, data) {
+		data.results=data.results.filter(r=>r.vote_count>0)
 		if (data.results.length>0) {
 			queries = []; // we got a hit, so reset queries
 			if (isDebug) {

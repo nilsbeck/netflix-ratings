@@ -2,7 +2,7 @@
   "author": "Nils Beckmann",
   "manifest_version": 2,
   "name": "netflix-ratings",
-  "version": "0.5.9",
+  "version": "0.6.7",
 
   "description": "This Extension adds themoviedb.org ratings to movies whenever they can be matched.",
 
